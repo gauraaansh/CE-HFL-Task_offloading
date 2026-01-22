@@ -1,0 +1,15 @@
+class Config:
+    GAMMA = 0.99
+    LR = 1e-3
+
+    EPSILON_START = 1.0
+    EPSILON_MIN = 0.05
+    EPSILON_DECAY = 0.995
+
+    BUFFER_SIZE = 100000
+    BATCH_SIZE = 64
+
+    TARGET_UPDATE = 10
+    EPISODES = 500
+    STEPS_PER_EPISODE = 50
+    FL_AGG_INTERVAL = 10
