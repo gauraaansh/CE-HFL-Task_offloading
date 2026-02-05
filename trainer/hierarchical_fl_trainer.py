@@ -3,6 +3,8 @@ from agent.ddqn_agent import DDQNAgent
 from env.mec_env import MECEnvironment
 from utils.metrics import MetricsLogger
 from config.config import Config
+from network.hierarchy_optimizer import HierarchyOptimizer
+
 
 class HierarchicalFLTrainer:
     def __init__(self, num_devices, num_edges):
@@ -19,11 +21,9 @@ class HierarchicalFLTrainer:
         self.loggers = [MetricsLogger() for _ in range(num_devices)]
 
         # Partition devices to edges
-        self.edge_groups = []
-        for i in range(num_edges):
-            start = i * self.devices_per_edge
-            end = start + self.devices_per_edge
-            self.edge_groups.append(list(range(start, end)))
+        optimizer = HierarchyOptimizer(num_devices, num_edges)
+        self.edge_groups = optimizer.build_groups()
+        print("Optimized groups:", self.edge_groups)
 
     # -------- Edge Aggregation --------
     def edge_aggregate(self, edge_device_ids):
