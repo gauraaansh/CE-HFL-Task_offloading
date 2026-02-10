@@ -3,16 +3,22 @@ from agent.ddqn_agent import DDQNAgent
 from env.mec_env import MECEnvironment
 from utils.metrics import MetricsLogger
 from config.config import Config
+from utils.comm_cost import model_size_bytes
 
 class FlatFLTrainer:
     def __init__(self, num_devices):
-        self.num_devices = num_devices
         self.envs = [MECEnvironment() for _ in range(num_devices)]
         self.agents = [
             DDQNAgent(state_dim=4, action_dim=2, cfg=Config())
             for _ in range(num_devices)
         ]
         self.loggers = [MetricsLogger() for _ in range(num_devices)]
+        self.model_bytes = model_size_bytes(self.agents[0].online_net)
+        self.total_comm_bytes = 0
+        self.num_devices = num_devices
+        self.reward_history = []
+        self.comm_history = []
+
 
     def fedavg(self):
         global_weights = {}
@@ -65,10 +71,21 @@ class FlatFLTrainer:
                 if episode % cfg.TARGET_UPDATE == 0:
                     agent.update_target()
 
-            # 🔹 FL aggregation step
+            #FL aggregation step
             if episode % cfg.FL_AGG_INTERVAL == 0 and episode > 0:
                 self.fedavg()
-                print(f"[Flat FL] Aggregation at episode {episode}")
+
+                # every device uploads once
+                self.total_comm_bytes += self.num_devices * self.model_bytes
+
+                print(f"[Flat FL] Aggregation | Comm so far: {self.total_comm_bytes/1e6:.2f} MB")
+
+            
+            avg_reward = sum(l.episode_rewards[-1] for l in self.loggers) / self.num_devices
+            self.reward_history.append(avg_reward)
+            self.comm_history.append(self.total_comm_bytes)
+            
+            
 
     def summarize(self):
         all_rewards, all_delays, all_energies = [], [], []

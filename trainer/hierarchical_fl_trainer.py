@@ -4,7 +4,7 @@ from env.mec_env import MECEnvironment
 from utils.metrics import MetricsLogger
 from config.config import Config
 from network.hierarchy_optimizer import HierarchyOptimizer
-
+from utils.comm_cost import model_size_bytes
 
 class HierarchicalFLTrainer:
     def __init__(self, num_devices, num_edges):
@@ -18,6 +18,10 @@ class HierarchicalFLTrainer:
             for _ in range(num_devices)
         ]
 
+        self.model_bytes = model_size_bytes(self.agents[0].online_net)
+        self.total_comm_bytes = 0
+        self.reward_history = []
+        self.comm_history = []        
         self.loggers = [MetricsLogger() for _ in range(num_devices)]
 
         # Partition devices to edges
@@ -92,22 +96,42 @@ class HierarchicalFLTrainer:
                     agent.update_target()
 
             # ----- Edge Aggregation -----
+      
+                                    
             if episode % cfg.FL_AGG_INTERVAL == 0 and episode > 0:
+            
                 edge_weights_list = []
-
+            
+                # device → edge uploads
+                self.total_comm_bytes += self.num_devices * self.model_bytes
+            
                 for edge_id, device_ids in enumerate(self.edge_groups):
                     edge_weights = self.edge_aggregate(device_ids)
                     edge_weights_list.append(edge_weights)
-
-                # ----- Cloud Aggregation -----
+            
+                # edge → cloud uploads (much fewer!)
+                self.total_comm_bytes += self.num_edges * self.model_bytes
+            
                 global_weights = self.cloud_aggregate(edge_weights_list)
+          
 
-                # ----- Broadcast Back -----
+  
                 for agent in self.agents:
                     agent.online_net.load_state_dict(global_weights)
                     agent.target_net.load_state_dict(global_weights)
+            
+                print(f"[Hierarchical FL] Aggregation | Comm so far: {self.total_comm_bytes/1e6:.2f} MB")
 
-                print(f"[Hierarchical FL] Cloud aggregation at episode {episode}")
+
+
+            
+            avg_reward = sum(l.episode_rewards[-1] for l in self.loggers) / self.num_devices
+            self.reward_history.append(avg_reward)
+            self.comm_history.append(self.total_comm_bytes)
+            
+
+
+
 
     def summarize(self):
         all_rewards, all_delays, all_energies = [], [], []
