@@ -1,9 +1,16 @@
 import torch
+import numpy as np
 from agent.ddqn_agent import DDQNAgent
 from env.mec_env import MECEnvironment
 from utils.metrics import MetricsLogger
 from config.config import Config
 from utils.comm_cost import model_size_bytes
+from utils.comm_energy import WirelessModel
+
+
+
+
+
 
 class FlatFLTrainer:
     def __init__(self, num_devices):
@@ -18,8 +25,12 @@ class FlatFLTrainer:
         self.num_devices = num_devices
         self.reward_history = []
         self.comm_history = []
-
-
+                
+        self.wireless = WirelessModel()
+        self.positions = np.random.rand(self.num_devices, 2) * 100
+        self.cloud_pos = np.array([50, 200])  # far away
+        self.total_comm_energy = 0
+        
     def fedavg(self):
         global_weights = {}
         for key in self.agents[0].online_net.state_dict().keys():
@@ -72,20 +83,26 @@ class FlatFLTrainer:
                     agent.update_target()
 
             #FL aggregation step
+           
+            
             if episode % cfg.FL_AGG_INTERVAL == 0 and episode > 0:
                 self.fedavg()
-
-                # every device uploads once
-                self.total_comm_bytes += self.num_devices * self.model_bytes
-
-                print(f"[Flat FL] Aggregation | Comm so far: {self.total_comm_bytes/1e6:.2f} MB")
+            
+                bits = self.model_bytes * 8
+            
+                for pos in self.positions:
+                    distance = np.linalg.norm(pos - self.cloud_pos)
+                    self.total_comm_energy += self.wireless.energy(
+                        bits, distance, is_edge=False
+                    )
+            
+                print(f"[Flat FL] Aggregation | Energy so far: {self.total_comm_energy:.2e} J")
+            
 
             
             avg_reward = sum(l.episode_rewards[-1] for l in self.loggers) / self.num_devices
             self.reward_history.append(avg_reward)
-            self.comm_history.append(self.total_comm_bytes)
-            
-            
+            self.comm_history.append(self.total_comm_energy)
 
     def summarize(self):
         all_rewards, all_delays, all_energies = [], [], []
