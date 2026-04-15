@@ -1,6 +1,7 @@
 # CE-HFL-Offloading: Project Research Document
 
-> **Type:** Workshop Paper (solo researcher)
+> **Type:** Workshop Paper
+> 
 > **Status:** Phase 1 complete — energy & reward comparison done. Phase 2 (novel contribution) in progress.
 
 ---
