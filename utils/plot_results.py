@@ -19,7 +19,7 @@ def plot_curves(results):
         plt.plot(comm, label=name)
 
     plt.xlabel("Episode")
-    plt.ylabel("Cumulative Communication (bytes)")
+    plt.ylabel("Cumulative Communication Energy (Joules)")
     plt.legend()
     plt.savefig("communication_curve.png")
     plt.close()

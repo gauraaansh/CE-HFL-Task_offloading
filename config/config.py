@@ -13,3 +13,11 @@ class Config:
     EPISODES = 500
     STEPS_PER_EPISODE = 50
     FL_AGG_INTERVAL = 10
+    
+    # ===============================
+    # Hierarchical FL time scales
+    # ===============================
+    EDGE_AGG_INTERVAL = FL_AGG_INTERVAL        # device → edge (cheap, frequent)
+    CLOUD_AGG_INTERVAL = 100       # edge → cloud (expensive, rare)
+    
+    

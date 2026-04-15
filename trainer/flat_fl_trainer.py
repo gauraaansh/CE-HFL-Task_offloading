@@ -6,6 +6,7 @@ from utils.metrics import MetricsLogger
 from config.config import Config
 from utils.comm_cost import model_size_bytes
 from utils.comm_energy import WirelessModel
+from network.topology import Topology
 
 
 
@@ -27,9 +28,10 @@ class FlatFLTrainer:
         self.comm_history = []
                 
         self.wireless = WirelessModel()
-        self.positions = np.random.rand(self.num_devices, 2) * 100
-        self.cloud_pos = np.array([50, 200])  # far away
+        self.topology = Topology(self.num_devices, 2)
         self.total_comm_energy = 0
+
+
         
     def fedavg(self):
         global_weights = {}
@@ -90,12 +92,14 @@ class FlatFLTrainer:
             
                 bits = self.model_bytes * 8
             
-                for pos in self.positions:
-                    distance = np.linalg.norm(pos - self.cloud_pos)
+                for pos in self.topology.device_pos:
+                    distance = np.linalg.norm(pos - self.topology.cloud_pos)
+                
                     self.total_comm_energy += self.wireless.energy(
                         bits, distance, is_edge=False
                     )
-            
+          
+ 
                 print(f"[Flat FL] Aggregation | Energy so far: {self.total_comm_energy:.2e} J")
             
 
