@@ -226,23 +226,22 @@ FedAA uses DDPG to control **aggregation weights** (how much each client contrib
 
 #### 2. DDQN / DRL Task Offloading in MEC — Saturated Area
 > Multiple papers 2023–2025 including:
-> - [Federated DRL for Task Offloading, ScienceDirect 2024](https://www.sciencedirect.com/science/article/abs/pii/S1084804524001188)
-> - [Federated DRL for Smart Cities, MDPI 2022](https://www.mdpi.com/1424-8220/22/13/4738)
-> - [Federated DRL for Industrial IoT, MDPI 2023](https://www.mdpi.com/2076-3417/13/11/6708)
-> - [DDQN for MEC Offloading Strategy, Springer 2024](https://link.springer.com/chapter/10.1007/978-3-031-55471-1_18)
+> - [Federated DRL for Task Offloading in Vehicular MEC (Journal of Network and Computer Applications, 2024)](https://www.sciencedirect.com/science/article/abs/pii/S1084804524001188)
+> - [Federated DRL for Smart Cities, MDPI Sensors 2022](https://www.mdpi.com/1424-8220/22/13/4738)
+> - [Federated DRL for Industrial IoT, MDPI Applied Sciences 2023](https://www.mdpi.com/2076-3417/13/11/6708)
+> - [Double DQN RL-Based Computational Offloading and Resource Allocation for MEC (MONAMI 2023, Springer)](https://link.springer.com/chapter/10.1007/978-3-031-55471-1_18)
 
 All of these use RL for task offloading decisions. None of them use RL to schedule FL aggregation rounds. None operate in a two-tier hierarchy with the energy of the aggregation tier itself in the reward.
 
 #### 3. Adaptive Aggregation Interval — Analytical, Not RL
-> Wang et al. "Adaptive Federated Learning in Resource Constrained Edge Computing." (2019)
-> [arxiv.org/pdf/2203.12163](https://arxiv.org/pdf/2203.12163)
+> Shiqiang Wang et al. "Adaptive Federated Learning in Resource Constrained Edge Computing Systems." IEEE JSAC, 2019.
+> [arxiv.org/abs/1804.05271](https://arxiv.org/abs/1804.05271)
 
 These approaches use analytical control-theory bounds to set aggregation frequency. They are not learned policies, do not operate in HFL, and are not energy-driven.
 
 #### 4. Hierarchical FL Scheduling Papers
-> [Hierarchical FL: Approaches and Open Problems, IEEE 2024](https://ieeexplore.ieee.org/iel8/6287639/10820123/11224517.pdf)
-> [Optimal Resource Management for HFL, arxiv 2023](https://arxiv.org/pdf/2305.01953)
-> [Task Scheduling in Edge Computing with HFL, WhiteRose 2024](https://eprints.whiterose.ac.uk/id/eprint/234705/1/HFL_Cluster_Final.pdf)
+> [Optimal Resource Management for HFL over HetNets with Wireless Energy Transfer (IEEE IoT Journal, 2023)](https://arxiv.org/abs/2305.01953)
+> [Task Scheduling in Edge Computing with HFL-Cluster (UCC '25, 2025)](https://eprints.whiterose.ac.uk/id/eprint/234705/)
 
 These use RL for **task scheduling** inside clusters (which computational task runs where), not for **FL aggregation scheduling** (when the FL round triggers). The level of decision-making is different.
 
@@ -597,19 +596,19 @@ ce-hfl-offloading/
 
 4. Shiqiang Wang, Tiffany Tuor, Theodoros Salonidis, Kin K. Leung et al. "Adaptive Federated Learning in Resource Constrained Edge Computing Systems." *IEEE Journal on Selected Areas in Communications*, Vol. 37, No. 6, 2019. https://arxiv.org/abs/1804.05271 — *Analytical control-theory bound (not RL) for adaptive aggregation interval, flat FL, no energy cost model.*
 
-5. "Federated Deep Reinforcement Learning for Task Offloading and Resource Allocation in MEC Vehicular Networks." *ScienceDirect*, 2024. https://www.sciencedirect.com/science/article/abs/pii/S1084804524001188 — *RL for task offloading, no aggregation scheduling.*
+5. Xu Zhao, Yichuan Wu, Tianhao Zhao, Feiyu Wang, Maozhen Li. "Federated deep reinforcement learning for task offloading and resource allocation in mobile edge computing-assisted vehicular networks." *Journal of Network and Computer Applications*, Vol. 229, 2024. https://www.sciencedirect.com/science/article/abs/pii/S1084804524001188 — *RL for task offloading, no aggregation scheduling.*
 
-6. "Federated Deep Reinforcement Learning-Based Task Offloading for Smart Cities." *MDPI Sensors*, 2022. https://www.mdpi.com/1424-8220/22/13/4738 — *Flat FL + DRL, no HFL, no aggregation scheduling.*
+6. Chen, Xing, Guizhong Liu. "Federated Deep Reinforcement Learning-Based Task Offloading and Resource Allocation for Smart Cities in a Mobile Edge Network." *MDPI Sensors*, Vol. 22, No. 13, 2022. https://www.mdpi.com/1424-8220/22/13/4738 — *Flat FL + DRL, no HFL, no aggregation scheduling.*
 
-7. "Federated Deep RL for Energy-Efficient Edge Computing Offloading in Industrial Internet." *MDPI Applied Sciences*, 2023. https://www.mdpi.com/2076-3417/13/11/6708 — *Energy in reward but for task, not FL rounds.*
+7. "Federated Deep Reinforcement Learning for Energy-Efficient Edge Computing Offloading and Resource Allocation in Industrial Internet." *MDPI Applied Sciences*, Vol. 13, No. 11, 2023. https://www.mdpi.com/2076-3417/13/11/6708 — *Energy in reward but for task execution, not FL rounds.*
 
-8. "Hierarchical Deep RL for Joint Dependent Task Offloading in MEC." *MDPI Electronics*, 2025. https://www.mdpi.com/2079-9292/14/24/4816 — *Hierarchical RL structure for task decisions, not FL aggregation.*
+8. Hengzhou Ye, Jiaming Li, Junyao Gao, Haoxiang Wen. "A Hierarchical Deep Reinforcement Learning Approach for Joint Dependent Task Offloading and Service Placement in MEC." *MDPI Electronics*, Vol. 14, No. 24, 2025. https://www.mdpi.com/2079-9292/14/24/4816 — *Hierarchical RL for task decisions only, no FL aggregation scheduling.*
 
-9. "Latency-Aware Energy-Efficient Task Offloading with DQN." *MDPI Electronics*, 2025. https://www.mdpi.com/2079-9292/14/15/3090 — *DQN for offloading, no FL, no aggregation scheduling.*
+9. Amina Benaboura, Rachid Bechar, Walid Kadri, Tu Dac Ho, Zhenni Pan, Shaaban Sahmoud. "Latency-Aware and Energy-Efficient Task Offloading in IoT and Cloud Systems with DQN Learning." *MDPI Electronics*, Vol. 14, No. 15, 2025. https://www.mdpi.com/2079-9292/14/15/3090 — *DQN for offloading, no FL, no aggregation scheduling.*
 
-10. Alsalem & Djemame. "Task Scheduling in Edge Computing Environments: a Hierarchical Cluster-based Federated Deep Reinforcement Learning Approach." *UCC '25 (18th IEEE/ACM Int. Conf. on Utility and Cloud Computing)*, 2025. https://eprints.whiterose.ac.uk/id/eprint/234705/ — *RL for task scheduling in clusters using FL, not FL aggregation round scheduling.*
+10. L. Alsalem, K. Djemame. "Task Scheduling in Edge Computing Environments: a Hierarchical Cluster-based Federated Deep Reinforcement Learning Approach." *UCC '25: 18th IEEE/ACM Int. Conf. on Utility and Cloud Computing*, 2025. https://eprints.whiterose.ac.uk/id/eprint/234705/ — *RL for task scheduling inside clusters using FL, not FL aggregation round scheduling.*
 
-11. Rami Hamdi et al. "Optimal Resource Management for Hierarchical Federated Learning over HetNets with Wireless Energy Transfer." *IEEE Internet of Things Journal*, 2023. https://arxiv.org/abs/2305.01953 — *Resource allocation in HFL using heuristic algorithm (H2RMA), not RL-based aggregation timing.*
+11. Rami Hamdi, Ahmed Ben Said, Emna Baccour, Aiman Erbad, Amr Mohamed, Mounir Hamdi, Mohsen Guizani. "Optimal Resource Management for Hierarchical Federated Learning over HetNets with Wireless Energy Transfer." *IEEE Internet of Things Journal*, 2023. https://arxiv.org/abs/2305.01953 — *Resource allocation in HFL using heuristic algorithm (H2RMA), not RL-based aggregation timing.*
 
 ---
 
