@@ -60,11 +60,20 @@ class HierarchicalFLTrainer:
     def _build_patga_trees(self, cfg):
         trees = []
         for edge_id, device_ids in enumerate(self.edge_groups):
-            tree = self.optimizer.build_tree(
-                edge_id, device_ids, self.model_bits,
-                D_max=cfg.D_MAX, comm_range=cfg.COMM_RANGE
-            )
-            trees.append(tree)
+            d_max = cfg.D_MAX
+            while True:
+                try:
+                    tree = self.optimizer.build_tree(
+                        edge_id, device_ids, self.model_bits,
+                        D_max=d_max, comm_range=cfg.COMM_RANGE
+                    )
+                    trees.append(tree)
+                    break
+                except ValueError as e:
+                    # D_max too tight for this topology — double it and retry
+                    print(f"[PATGA] {e}")
+                    d_max *= 2.0
+                    print(f"[PATGA] Retrying edge {edge_id} with D_max={d_max:.4f}s")
         return trees
 
     # =========================================================

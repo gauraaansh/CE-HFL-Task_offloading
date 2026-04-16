@@ -131,10 +131,18 @@ class HierarchyOptimizer:
                 delay_g[EDGE][d_id]  = path_delay[d_id]
                 energy_g[EDGE][d_id] = energy_g[d_id][EDGE]
 
-        # ---- Lines 5-6: feasibility warning ----
-        if any(path_delay[d] > D_max for d in device_ids):
-            print(f"[PATGA] Warning: min-delay tree exceeds D_max={D_max}s "
-                  f"for edge {edge_id} — proceeding anyway")
+        # ---- Lines 5-6: feasibility check — hard stop ----
+        # If the minimum-delay tree (fastest possible paths) already violates
+        # D_max, no valid tree exists. Continuing would silently return an
+        # infeasible solution. Raise so the caller can handle it.
+        violating = [d for d in device_ids if path_delay[d] > D_max]
+        if violating:
+            raise ValueError(
+                f"[PATGA] D_max={D_max}s is infeasible for edge {edge_id}. "
+                f"Devices {violating} cannot reach edge server within D_max "
+                f"even on the minimum-delay path. "
+                f"Increase D_max or increase COMM_RANGE."
+            )
 
         # build children dict from parent pointers
         children = {n: [] for n in all_nodes}
