@@ -29,5 +29,15 @@ class Config:
     # to MST (deep chains) because the constraint is never binding.
     D_MAX      = 0.012  # maximum upload delay constraint (seconds)
     COMM_RANGE = 70.0   # max wireless link distance (metres), Paper 2 uses 70m
-    
-    
+
+    # ===============================
+    # AAS-HFL Scheduler (Phase 2)
+    # ===============================
+    LAMBDA              = 0.5    # convergence penalty weight in scheduler reward
+    ALPHA_FL            = 0.1    # FL energy weight in per-device task reward
+    EMA_BETA            = 0.9    # EMA smoothing factor for reward delta
+    SCHED_EPSILON_DECAY = 0.997  # slower ε decay (scheduler sees only 1 decision/episode)
+    SCHED_TAU           = 0.005  # soft target update coefficient
+    SCHED_STATE_DIM     = 5
+    SCHED_ACTION_DIM    = 3
+

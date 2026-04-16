@@ -1,8 +1,11 @@
 import numpy as np
 
 class MECEnvironment:
-    def __init__(self, max_queue=10):
+    def __init__(self, max_queue=10, fl_energy_share=0.0, alpha_fl=0.0):
         self.max_queue = max_queue
+        # amortized FL upload cost per episode for this device (J)
+        self.fl_energy_share = fl_energy_share
+        self.alpha_fl = alpha_fl
 
     def reset(self):
         return [
@@ -22,7 +25,7 @@ class MECEnvironment:
             delay = task / (channel + 1e-5)
             energy = task * 0.3
 
-        reward = -(delay + energy)
+        reward = -(delay + energy + self.alpha_fl * self.fl_energy_share)
 
         next_state = [
             np.random.rand(),
