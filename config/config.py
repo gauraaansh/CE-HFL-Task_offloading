@@ -23,7 +23,11 @@ class Config:
     # ===============================
     # PATGA parameters (Paper 2)
     # ===============================
-    D_MAX      = 2.0    # maximum upload delay constraint (seconds)
+    # D_MAX is scaled to our model size (~70KB, ~0.003s per hop at 50m).
+    # Paper 2 uses 5MB model; their D_max allows ~3-8 hops. We match that
+    # ratio: 4 hops × 0.003s/hop = 0.012s. Without this, PATGA degenerates
+    # to MST (deep chains) because the constraint is never binding.
+    D_MAX      = 0.012  # maximum upload delay constraint (seconds)
     COMM_RANGE = 70.0   # max wireless link distance (metres), Paper 2 uses 70m
     
     
