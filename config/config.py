@@ -17,7 +17,13 @@ class Config:
     # ===============================
     # Hierarchical FL time scales
     # ===============================
-    EDGE_AGG_INTERVAL = FL_AGG_INTERVAL        # device → edge (cheap, frequent)
-    CLOUD_AGG_INTERVAL = 100       # edge → cloud (expensive, rare)
+    EDGE_AGG_INTERVAL  = FL_AGG_INTERVAL   # device → edge (cheap, frequent)
+    CLOUD_AGG_INTERVAL = 100               # edge → cloud (expensive, rare)
+
+    # ===============================
+    # PATGA parameters (Paper 2)
+    # ===============================
+    D_MAX      = 2.0    # maximum upload delay constraint (seconds)
+    COMM_RANGE = 70.0   # max wireless link distance (metres), Paper 2 uses 70m
     
     
