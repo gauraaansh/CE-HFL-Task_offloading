@@ -1,15 +1,16 @@
 import numpy as np
 
 class HierarchyOptimizer:
-    def __init__(self, num_devices, num_edges, area_size=100):
+    def __init__(self, num_devices, num_edges, device_positions=None, edge_positions=None, area_size=100):
         self.num_devices = num_devices
         self.num_edges = num_edges
 
-        # randomly place devices in 2D space (simulated geography)
-        self.device_positions = np.random.rand(num_devices, 2) * area_size
+        # use positions from Topology if provided, otherwise generate independently
+        self.device_positions = device_positions if device_positions is not None \
+            else np.random.rand(num_devices, 2) * area_size
 
-        # randomly place edges
-        self.edge_positions = np.random.rand(num_edges, 2) * area_size
+        self.edge_positions = edge_positions if edge_positions is not None \
+            else np.random.rand(num_edges, 2) * area_size
 
         # random channel quality per device
         self.channel_quality = np.random.rand(num_devices) + 0.1

@@ -44,7 +44,12 @@ class HierarchicalFLTrainer:
         self.topology = Topology(self.num_devices, self.num_edges)
 
         # ---------------- Hierarchical grouping ----------------
-        self.optimizer = HierarchyOptimizer(num_devices, num_edges)
+        # pass Topology positions so grouping matches actual energy calculation
+        self.optimizer = HierarchyOptimizer(
+            num_devices, num_edges,
+            device_positions=self.topology.device_pos,
+            edge_positions=self.topology.edge_pos
+        )
         self.edge_groups = self.optimizer.build_groups()
 
         print("Optimized groups:", self.edge_groups)

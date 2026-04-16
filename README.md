@@ -102,7 +102,7 @@ This is the chronological build-up of the project, reflected in git history.
 - PATGA-inspired greedy device-to-edge grouping (energy + delay cost)
 - Separate aggregation intervals for each tier (frequent edge, rare cloud)
 
-**Key limitation:** Aggregation frequency at each tier is fixed per global training round. The algorithm is greedy and static — it does not adapt to changing channel conditions or remaining energy budgets during training.
+**Key limitation:** PATGA optimizes *which path* model updates travel (the aggregation tree topology — which nodes relay, which links are used) but not *when* aggregation happens. The total number of training rounds T is a fixed input to PATGA, and aggregation runs at every round t ∈ T. Energy savings come from path selection, not from reducing aggregation frequency. There is no mechanism to decide whether a given round's aggregation is worth its communication cost, and no adaptation to convergence state or changing channel conditions during training.
 
 ---
 
@@ -145,12 +145,12 @@ Both papers share a common assumption that is never questioned:
 
 | | Paper 1 (Li et al., 2023) | Paper 2 (Li et al., 2024) |
 |---|---|---|
-| **Aggregation timing** | Fixed every N episodes | Fixed rounds per global round |
+| **Aggregation timing** | Fixed every N episodes | Fixed — aggregation runs every round T (given as input) |
+| **Aggregation path** | Flat (all→cloud) | PATGA optimizes relay tree topology per round |
 | **FL cost in RL reward** | Not included | Not applicable (no RL) |
-| **Aggregation path** | Flat (all→cloud) | Greedy PATGA (static) |
 | **Adaptation to channel** | Via offloading decision only | No runtime adaptation |
 
-**Gap 1:** Neither paper treats aggregation timing as a decision variable. Both use hardcoded intervals. There is no mechanism for the system to say "channel conditions are bad right now, defer the expensive edge→cloud aggregation."
+**Gap 1:** Neither paper treats aggregation timing as a decision variable. Paper 1 uses a hardcoded episode interval. Paper 2's PATGA optimizes which path updates travel but still runs at every training round — it never decides to skip a round. There is no mechanism for the system to say "the model hasn't diverged enough to justify the cost right now, defer this aggregation."
 
 **Gap 2:** In Paper 1, the DDQN reward optimizes only task execution cost. The energy spent uploading model parameters during FL rounds is completely invisible to the RL agent — even though it drains the same device battery and uses the same radio channel.
 
@@ -207,6 +207,21 @@ r = -(delay + task_energy + α * fl_energy_per_device_per_round)
 ```
 
 Where `fl_energy_per_device_per_round` is the wireless cost of uploading model parameters to the assigned edge server, computed from `WirelessModel` using the device's position in `Topology`. This makes the device agent aware that aggressive task offloading may deplete battery needed for FL uploads.
+
+---
+
+### The RL Analogy: Same Principle, Different Decision
+
+This contribution deliberately mirrors the structure of Paper 1:
+
+| | Paper 1 DDQN (Task Offloading) | Our DDQN (Aggregation Scheduling) |
+|---|---|---|
+| **Question answered** | Is it worth sending this task to the edge? | Is it worth aggregating models right now? |
+| **State** | [task_size, queue, channel, battery] | [reward_delta, cum_energy, channel, t_edge, t_cloud] |
+| **Action** | {local, offload} | {wait, edge-agg, cloud-agg} |
+| **Cost vs benefit** | Computation saved vs transmission energy | Convergence improvement vs FL comm energy |
+
+Paper 1's DDQN optimizes *task routing*. Our DDQN optimizes *model synchronization timing*. The same RL framework that learns where to compute now also learns when to synchronize — extending the adaptive decision-making from the task plane to the FL plane.
 
 ---
 
@@ -429,10 +444,16 @@ E_total = Σ_devices E_tx(device→edge) * num_edge_aggs
 - [ ] Add `α * fl_cost_share` term to `MECEnvironment.step()` reward
 - [ ] Add `α` as a tunable hyperparameter in `Config`
 
-#### 2c. Full PATGA (Optional — strengthens paper)
-- [ ] Implement delay-constrained iterative link replacement in `HierarchyOptimizer`
+#### 2c. Full PATGA Path Optimization (Layer 1 — strengthens paper)
+Paper 2's PATGA optimizes *which path* model updates travel. Currently we use a greedy nearest-edge assignment. Full PATGA replaces this with a delay-constrained relay tree that lets intermediate devices cooperate to reduce transmission distance.
+
+- [ ] Implement Phase 1 of PATGA in `HierarchyOptimizer`: build minimum-delay spanning tree via Dijkstra
+- [ ] Implement Phase 2: iteratively replace high-energy links with cheaper cooperative relay paths, subject to `D_max`
 - [ ] Add `D_max` as a constraint parameter in `Config`
-- [ ] Show PATGA grouping vs. greedy grouping energy comparison
+- [ ] Wire PATGA tree structure into energy calculation in `hierarchical_fl_trainer.py`
+- [ ] Compare energy: greedy grouping vs. PATGA grouping as an ablation
+
+**Relationship to contribution 1 (scheduler):** These are orthogonal. PATGA optimizes the path taken when aggregation is triggered. The scheduler DDQN optimizes when aggregation is triggered. The full AAS-HFL system uses both: PATGA picks the best path, the scheduler decides whether the round is worth doing at all.
 
 ### Phase 3 — Experiments & Ablation
 
@@ -613,5 +634,5 @@ ce-hfl-offloading/
 
 ---
 
-*Last updated: 2026-04-16*
+*Last updated: 2026-04-16 (Paper 2 limitation clarified; RL analogy section added; PATGA TODO expanded)*
 *Author: Solo researcher*
